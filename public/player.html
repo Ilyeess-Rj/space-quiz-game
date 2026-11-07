@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save the Astronaut — Player</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background: radial-gradient(ellipse at 20% 10%, #1a0b3d 0%, #050515 55%, #010108 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 16px;
+  }
+  #cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  #cosmos .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle 3s infinite; }
+  @keyframes twinkle { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+  #cosmos .nebula { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .35; }
+
+  .screen { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .hidden { display: none !important; }
+
+  h1 { font-size: 24px; text-align: center; letter-spacing: 2px;
+    background: linear-gradient(90deg, #7dd3fc, #a855f7, #fbbf24);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { text-align: center; color: #93c5fd; font-size: 14px; letter-spacing: 1px; }
+
+  .card {
+    background: rgba(15, 18, 48, .85);
+    border: 1px solid #2d3a5e;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  }
+
+  input[type=text] {
+    width: 100%; padding: 14px; font-size: 17px;
+    border-radius: 12px; border: 2px solid #4a90d9;
+    background: rgba(10, 14, 42, .8); color: #ffffff; outline: none;
+  }
+  input[type=text]:focus { box-shadow: 0 0 18px rgba(74,144,217,.5); }
+  input[type=text]::placeholder { color: #64748b; }
+
+  #teams { display: flex; flex-direction: column; gap: 10px; }
+  .teamCard {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; border-radius: 14px; cursor: pointer;
+    border: 2px solid #2d3a5e;
+    background: linear-gradient(180deg, #16224d, #0b1236);
+    transition: transform .12s, box-shadow .2s, border-color .2s;
+  }
+  .teamCard:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(90,140,255,.4); }
+  .teamCard .tIcon { font-size: 28px; }
+  .teamCard .tName { font-size: 18px; font-weight: 800; }
+  .teamCard .tTag { font-size: 11px; color: #a5b4fc; letter-spacing: 1px; }
+  .teamCard.selected { border-color: currentColor; box-shadow: 0 0 26px rgba(251,191,36,.5); }
+
+  .btn {
+    border: 1px solid rgba(122,162,247,.55);
+    border-radius: 12px;
+    padding: 16px; font-size: 17px; font-weight: 800; letter-spacing: 1px;
+    color: #ffffff; cursor: pointer; text-transform: uppercase;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(90,140,255,.35), transparent 55%),
+      linear-gradient(180deg, #16224d 0%, #0b1236 100%);
+    box-shadow: 0 0 18px rgba(90,140,255,.25), inset 0 1px 0 rgba(255,255,255,.12);
+    transition: transform .12s, box-shadow .2s;
+    width: 100%;
+  }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 0 30px rgba(120,160,255,.55); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+  .btn.launch {
+    border-color: rgba(52,211,153,.6);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(52,211,153,.35), transparent 55%),
+      linear-gradient(180deg, #0d3d33 0%, #06251f 100%);
+  }
+
+  #statusBar {
+    text-align: center; font-size: 14px; font-weight: 700; letter-spacing: 1px;
+    padding: 10px; border-radius: 10px; color: #ffffff;
+  }
+  #statusBar.ok { color: #34d399; background: rgba(52,211,153,.12); border: 1px solid rgba(52,211,153,.4); }
+  #statusBar.ko { color: #f87171; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.4); }
+  #statusBar.wait { color: #93c5fd; background: rgba(74,144,217,.12); border: 1px solid rgba(74,144,217,.4); }
+
+  /* astronaut status + meteor danger track */
+  #astroBox { display: flex; flex-direction: column; gap: 10px; }
+  #dangerTrack { display: flex; align-items: center; gap: 4px; }
+  #astroImg { width: 62px; height: 62px; flex-shrink: 0; transition: transform .3s; }
+  #astroImg.shake { animation: shake .5s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  #trackLine {
+    position: relative; flex: 1; height: 70px;
+  }
+  #rope {
+    position: absolute; left: 0; right: 0; top: 50%; height: 0;
+    border-top: 3px dashed rgba(125,211,252,.55);
+    filter: drop-shadow(0 0 4px rgba(125,211,252,.4));
+  }
+  #meteorImg {
+    position: absolute; top: 50%; left: 88%;
+    width: 58px; height: 58px;
+    transform: translate(-50%,-50%);
+    transition: left 1.2s cubic-bezier(.34,1.3,.64,1);
+    filter: drop-shadow(0 0 10px rgba(249,115,22,.55));
+  }
+  #astroMsg { font-size: 15px; font-weight: 800; line-height: 1.4; text-align: center; }
+  #saveProgress { font-size: 13px; color: #6ee7b7; text-align: center; font-weight: 700; }
+
+  /* timer */
+  #timerBox { display: none; }
+  #timerTop { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; color: #7dd3fc; margin-bottom: 4px; }
+  #timerTop .low { color: #ef4444; }
+  #timerBarBg { height: 10px; border-radius: 6px; background: rgba(74,144,217,.15); overflow: hidden; }
+  #timerBar { height: 100%; width: 100%; background: linear-gradient(90deg, #34d399, #7dd3fc); transition: width .25s linear; }
+  #timerBar.low { background: linear-gradient(90deg, #ef4444, #f59e0b); }
+
+  #questionText { font-size: 20px; font-weight: 800; text-align: center; line-height: 1.4; color: #ffffff; text-shadow: 0 0 16px rgba(122,162,247,.35); }
+  #questionImg { display: none; width: 100%; border-radius: 12px; border: 1px solid #3b4a7a; margin-top: 10px; }
+
+  #answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .answer {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 10px; border-radius: 16px; cursor: pointer;
+    border: 2px solid #2d3a5e;
+    background: linear-gradient(180deg, #16224d, #0b1236);
+    font-size: 16px; font-weight: 700; text-align: center;
+    color: #ffffff;
+    min-height: 110px;
+    transition: transform .12s, box-shadow .2s, border-color .2s;
+    box-shadow: 0 4px 18px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .answer:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 26px rgba(120,160,255,.5); border-color: #4a90d9; }
+  .answer:disabled { opacity: .55; cursor: default; }
+  .answer img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+  .answer.wide { grid-column: 1 / -1; min-height: 70px; }
+  .answer.correct { border-color: #34d399 !important; background: linear-gradient(180deg, #0d3d33, #06251f); box-shadow: 0 0 26px rgba(52,211,153,.6) !important; opacity: 1 !important; }
+  .answer.wrong { border-color: #ef4444 !important; opacity: .6; }
+  .answer.picked { outline: 3px solid #fbbf24; opacity: 1; }
+
+  #miniScores, #miniScoresWait, #miniScoresDead { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip { font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 20px; border: 1px solid; color: #ffffff; }
+
+  .spinner { text-align: center; font-size: 40px; animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: .4; } 50% { opacity: 1; } }
+
+  #explanation {
+    display: none; padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.5;
+    border: 1px solid rgba(251,191,36,.5); background: rgba(251,191,36,.1); color: #fde68a;
+  }
+
+  /* eliminated screen */
+  #deadAstro { width: 180px; height: 180px; margin: 0 auto; display: block; }
+  #deadTitle { text-align: center; font-size: 24px; font-weight: 900; color: #ef4444; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div id="cosmos"></div>
+
+<!-- JOIN SCREEN -->
+<div class="screen" id="joinScreen">
+  <h1>🧑‍🚀 SAVE THE ASTRONAUT</h1>
+  <div class="sub">AI &amp; SPACE EXPLORATION QUIZ</div>
+  <div class="card">
+    <div class="sub" style="margin-bottom:10px">YOUR NAME</div>
+    <input type="text" id="nameInput" placeholder="Enter your name…" autocomplete="off">
+  </div>
+  <div class="card">
+    <div class="sub" style="margin-bottom:10px">CHOOSE YOUR TEAM</div>
+    <div id="teams"></div>
+  </div>
+  <button class="btn launch" id="btnJoin" disabled>🛸 Join the mission</button>
+  <div class="sub" style="color:#fbbf24">Save at least HALF of each round's questions or your astronaut dies and your team is ELIMINATED!</div>
+</div>
+
+<!-- WAIT SCREEN -->
+<div class="screen hidden" id="waitScreen">
+  <div class="spinner">🛰️</div>
+  <div class="sub" id="waitMsg">You're in! Waiting for the host to start…</div>
+  <div class="card">
+    <div class="sub" style="margin-bottom:10px">LIVE SCORES</div>
+    <div id="miniScoresWait"></div>
+  </div>
+</div>
+
+<!-- PLAY SCREEN -->
+<div class="screen hidden" id="playScreen">
+  <div class="card">
+    <div id="astroBox">
+      <div id="dangerTrack">
+        <img id="astroImg" src="/img/astronaut-safe.svg" alt="astronaut">
+        <div id="trackLine">
+          <div id="rope"></div>
+          <img id="meteorImg" src="/img/meteor.svg" alt="meteorite">
+        </div>
+      </div>
+      <div id="astroMsg">Your astronaut is safe… for now!</div>
+      <div id="saveProgress"></div>
+    </div>
+  </div>
+  <div id="statusBar" class="wait">Get ready…</div>
+  <div id="timerBox">
+    <div id="timerTop"><span>⏱️ TIME LEFT</span><span id="timerSecs">30s</span></div>
+    <div id="timerBarBg"><div id="timerBar"></div></div>
+  </div>
+  <div class="card">
+    <div id="questionText"></div>
+    <img id="questionImg" alt="">
+  </div>
+  <div id="answers"></div>
+  <button class="btn launch hidden" id="btnValidate">✅ Validate my answers</button>
+  <div id="explanation"></div>
+  <div class="card">
+    <div class="sub" style="margin-bottom:8px">LIVE SCORES</div>
+    <div id="miniScores"></div>
+  </div>
+</div>
+
+<!-- ELIMINATED SCREEN -->
+<div class="screen hidden" id="deadScreen">
+  <img id="deadAstro" src="/img/astronaut-dead.svg" alt="dead astronaut">
+  <div id="deadTitle">YOUR ASTRONAUT DIDN'T SURVIVE 💀</div>
+  <div class="sub">Your team is ELIMINATED. You can still watch the mission and cheer for the survivors!</div>
+  <div class="card">
+    <div class="sub" style="margin-bottom:10px">LIVE SCORES</div>
+    <div id="miniScoresDead"></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const $ = id => document.getElementById(id);
+let myGroup = null;
+let myPicks = [];
+let submitted = false;
+let state = null;
+let correctAnswers = [];
+let timeOffset = 0;
+
+(function buildCosmos() {
+  const c = $('cosmos');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 1;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+  const n = document.createElement('div');
+  n.className = 'nebula';
+  n.style.cssText = 'background:#4a1d96;width:300px;height:300px;left:-60px;top:20%';
+  c.appendChild(n);
+  const n2 = document.createElement('div');
+  n2.className = 'nebula';
+  n2.style.cssText = 'background:#0e4494;width:280px;height:280px;right:-50px;top:5%';
+  c.appendChild(n2);
+})();
+
+// ---------- countdown ----------
+setInterval(() => {
+  const box = $('timerBox');
+  if (!state || state.phase !== 'question' || !state.questionStartedAt) {
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display = 'block';
+  const dur = state.questionDuration * 1000;
+  const remain = Math.max(0, dur - ((Date.now() + timeOffset) - state.questionStartedAt));
+  const secs = Math.ceil(remain / 1000);
+  const low = secs <= 5;
+  $('timerSecs').textContent = remain === 0 ? 'TIME UP' : secs + 's';
+  $('timerSecs').className = low ? 'low' : '';
+  $('timerBar').className = low ? 'low' : '';
+  $('timerBar').style.width = (100 * remain / dur) + '%';
+}, 200);
+
+const TEAM_META = {
+  'Alpha':       { color: '#00d4aa', icon: '🚀', tag: 'Speed & precision' },
+  'Geforce':     { color: '#6366f1', icon: '⚡', tag: 'Raw power' },
+  'Beta':        { color: '#f59e0b', icon: '🛰️', tag: 'Orbital intelligence' },
+  'Antigravity': { color: '#ec4899', icon: '🌌', tag: 'Defying limits' },
+  'MR.Chokri':   { color: '#ef4444', icon: '👨‍🏫', tag: 'THE PROFESSOR — try to beat him!' }
+};
+
+function buildTeamCards() {
+  const box = $('teams');
+  box.innerHTML = '';
+  Object.entries(TEAM_META).forEach(([name, m]) => {
+    const d = document.createElement('div');
+    d.className = 'teamCard';
+    d.style.color = m.color;
+    d.innerHTML = `<span class="tIcon">${m.icon}</span><span><span class="tName" style="color:${m.color}">${name}</span><br><span class="tTag">${m.tag}</span></span>`;
+    d.onclick = () => {
+      document.querySelectorAll('.teamCard').forEach(c => c.classList.remove('selected'));
+      d.classList.add('selected');
+      myGroup = name;
+      updateJoinBtn();
+    };
+    box.appendChild(d);
+  });
+}
+
+function updateJoinBtn() {
+  $('btnJoin').disabled = !($('nameInput').value.trim().length > 0 && myGroup);
+}
+
+$('nameInput').addEventListener('input', updateJoinBtn);
+$('btnJoin').onclick = () => {
+  socket.emit('joinGame', { name: $('nameInput').value.trim(), group: myGroup });
+  $('joinScreen').classList.add('hidden');
+  $('waitScreen').classList.remove('hidden');
+};
+
+function miniScores(elId, groups) {
+  $(elId).innerHTML = Object.entries(groups)
+    .map(([n, g]) => `<span class="chip" style="border-color:${g.color};background:${g.color}33">${g.icon} ${n}${g.eliminated ? ' 💀' : ''} · ${g.score}</span>`)
+    .join('');
+}
+
+function isMulti(q) { return !!q.multi; }
+
+function renderAnswers(q) {
+  const box = $('answers');
+  const longTexts = q.options.filter(o => o.text && o.text.length > 32).length;
+  box.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const a = document.createElement('button');
+    a.className = 'answer' + ((longTexts > 1 && opt.text) ? ' wide' : '');
+    a.style.color = '#ffffff';
+    a.innerHTML = opt.img
+      ? `<img src="${opt.img}" alt=""><span>${opt.label}</span>`
+      : `<span>${opt.text}</span>`;
+    a.disabled = state.phase !== 'question' || submitted || state.timeUp;
+    a.onclick = () => {
+      if (state.phase !== 'question' || submitted || state.timeUp) return;
+      if (isMulti(q)) {
+        if (myPicks.includes(i)) {
+          myPicks = myPicks.filter(x => x !== i);
+          a.classList.remove('picked');
+        } else {
+          myPicks.push(i);
+          a.classList.add('picked');
+        }
+        $('btnValidate').disabled = myPicks.length === 0;
+      } else {
+        myPicks = [i];
+        submitted = true;
+        socket.emit('submitAnswer', { answerIndex: i });
+        document.querySelectorAll('.answer').forEach(x => { x.disabled = true; x.classList.remove('picked'); });
+        a.classList.add('picked');
+        $('btnValidate').classList.add('hidden');
+        lockStatus();
+      }
+    };
+    box.appendChild(a);
+  });
+
+  // restore selections on re-render
+  myPicks.forEach(i => {
+    const el = box.children[i];
+    if (el) el.classList.add('picked');
+  });
+  if (submitted) document.querySelectorAll('.answer').forEach(x => x.disabled = true);
+
+  const showValidate = isMulti(q) && state.phase === 'question' && !submitted && !state.timeUp;
+  $('btnValidate').classList.toggle('hidden', !showValidate);
+  $('btnValidate').disabled = myPicks.length === 0;
+}
+
+$('btnValidate').onclick = () => {
+  if (myPicks.length === 0 || submitted) return;
+  submitted = true;
+  socket.emit('submitAnswer', { answers: myPicks });
+  $('btnValidate').classList.add('hidden');
+  document.querySelectorAll('.answer').forEach(x => x.disabled = true);
+  lockStatus();
+};
+
+function lockStatus() {
+  const sb = $('statusBar');
+  sb.className = 'wait';
+  sb.textContent = 'Answer locked in… waiting for the host 🛰️';
+}
+
+function updateAstronaut() {
+  const result = (state.lastTeamResults || {})[myGroup];
+  const g = state.groups[myGroup] || {};
+  const level = g.dangerLevel || 0;
+  const img = $('astroImg');
+  const msg = $('astroMsg');
+  const st = (state.teamStats || {})[myGroup];
+  $('saveProgress').textContent = st ? `🧑‍🚀 Round saves: ${st.saved}/${st.total} — you need at least half!` : '';
+
+  // meteor position: far right (88%) when safe, almost on him (10%) at max danger
+  $('meteorImg').style.left = (88 - (level / 4) * 78) + '%';
+
+  if (state.phase === 'question_result') {
+    if (result === 'saved') {
+      img.src = '/img/astronaut-safe.svg';
+      msg.textContent = level === 0 ? 'ASTRONAUT SAVED! The meteorite is far away! 🎉' : 'SAVED! The meteorite moves back… keep going! 🎉';
+      msg.style.color = '#34d399';
+    } else {
+      img.src = '/img/astronaut-danger.svg';
+      msg.textContent = level >= 3 ? '☄️ THE METEORITE IS ALMOST ON HIM!! Answer correctly NOW!' : '☄️ A meteorite is getting closer! Save him next question!';
+      msg.style.color = level >= 3 ? '#ef4444' : '#f59e0b';
+      img.classList.remove('shake');
+      void img.offsetWidth;
+      img.classList.add('shake');
+    }
+  } else if (state.phase === 'question') {
+    img.src = result === 'danger' ? '/img/astronaut-danger.svg' : '/img/astronaut-safe.svg';
+    msg.textContent = level === 0 ? 'Your astronaut is calm — the meteorite is far away.'
+      : (level >= 3 ? '☄️ The meteorite is RIGHT THERE — correct answer to push it back!' : 'The meteorite is approaching… answer correctly to push it back!');
+    msg.style.color = '#ffffff';
+  }
+}
+
+function renderPlay() {
+  const g = state.groups[myGroup];
+  const round = state.currentRoundData;
+  const q = round ? round.questions[state.currentQuestionIndex] : null;
+
+  // ---- eliminated = spectator screen ----
+  if (g && g.eliminated) {
+    $('waitScreen').classList.add('hidden');
+    $('playScreen').classList.add('hidden');
+    $('deadScreen').classList.remove('hidden');
+    miniScores('miniScoresDead', state.groups);
+    return;
+  }
+  $('deadScreen').classList.add('hidden');
+
+  if (state.phase === 'lobby') {
+    $('waitScreen').classList.remove('hidden');
+    $('playScreen').classList.add('hidden');
+    $('waitMsg').textContent = 'You are in! Waiting for the host to start the game…';
+    miniScores('miniScoresWait', state.groups);
+    return;
+  }
+
+  $('waitScreen').classList.add('hidden');
+  $('playScreen').classList.remove('hidden');
+  updateAstronaut();
+
+  if (state.phase === 'question' && q) {
+    const sb = $('statusBar');
+    sb.className = 'ok';
+    sb.textContent = `ROUND ${round.round} · Q${state.currentQuestionIndex + 1}/${round.questions.length}` +
+      (q.multi ? ' — SELECT ALL CORRECT ANSWERS!' : ' — PICK YOUR ANSWER!');
+    $('questionText').textContent = q.q;
+    if (q.image) { $('questionImg').src = q.image; $('questionImg').style.display = 'block'; }
+    else $('questionImg').style.display = 'none';
+    $('explanation').style.display = 'none';
+    renderAnswers(q);
+    if (submitted) lockStatus();
+    else if (state.timeUp) {
+      sb.className = 'ko';
+      sb.textContent = '⏱️ TIME UP! Wait for the host to reveal the answer…';
+    }
+  }
+
+  if (state.phase === 'question_result' && q) {
+    const myCorrect = correctAnswers.length === myPicks.length && correctAnswers.every(i => myPicks.includes(i));
+    document.querySelectorAll('.answer').forEach((el, i) => {
+      el.disabled = true;
+      el.classList.remove('picked');
+      if (correctAnswers.includes(i)) el.classList.add('correct');
+      else if (myPicks.includes(i)) el.classList.add('wrong');
+    });
+    $('btnValidate').classList.add('hidden');
+    const sb = $('statusBar');
+    const result = (state.lastTeamResults || {})[myGroup];
+    if (submitted && myCorrect) { sb.className = 'ok'; sb.textContent = '✅ CORRECT! +10 points — astronaut saved!'; }
+    else if (submitted) { sb.className = 'ko'; sb.textContent = q.multi ? '❌ WRONG — you needed ALL correct answers (no more, no less)!' : '❌ WRONG — your astronaut is in danger!'; }
+    else { sb.className = 'ko'; sb.textContent = '⏱️ No answer — your astronaut is in danger!'; }
+    if (result === 'danger' && submitted && myCorrect) sb.textContent += ' (Team check failed though!)';
+    $('explanation').textContent = '💡 ' + q.explanation;
+    $('explanation').style.display = 'block';
+  }
+
+  if (state.phase === 'round_summary') {
+    const rr = (state.roundResults || []).find(r => r.team === myGroup);
+    $('statusBar').className = rr && rr.survived ? 'ok' : 'ko';
+    $('statusBar').textContent = rr
+      ? (rr.survived ? `🏁 ROUND ${round.round} SURVIVED (${rr.saved}/${rr.total} saves) — next round soon!` : `💀 ROUND ${round.round} FAILED (${rr.saved}/${rr.total} saves)…`)
+      : `🏁 ROUND ${round.round} COMPLETE — waiting for the host…`;
+    $('answers').innerHTML = '';
+    $('btnValidate').classList.add('hidden');
+    $('explanation').style.display = 'none';
+    const img = $('astroImg');
+    if (rr && !rr.survived) {
+      img.src = '/img/astronaut-dead.svg';
+      $('astroMsg').textContent = 'Your astronaut didn\'t make it… 💀';
+      $('astroMsg').style.color = '#ef4444';
+    } else if (rr) {
+      img.src = '/img/astronaut-safe.svg';
+      $('astroMsg').textContent = 'Your astronaut survived this round! 🎉';
+      $('astroMsg').style.color = '#34d399';
+    }
+  }
+
+  if (state.phase === 'game_over') {
+    const sorted = Object.entries(state.groups).map(([n, g]) => ({ n, ...g })).sort((a, b) => b.score - a.score);
+    const survivors = sorted.filter(t => !t.eliminated && t.members > 0);
+    const w = survivors.length ? survivors[0] : sorted[0];
+    const chokri = sorted.find(t => t.n === 'MR.Chokri');
+    $('statusBar').className = w.n === 'MR.Chokri' ? 'ko' : 'ok';
+    $('statusBar').textContent = `🏆 WINNER: ${w.icon} ${w.n} (${w.score} pts) ${w.n !== 'MR.Chokri' && chokri && (chokri.eliminated || chokri.score < w.score) ? '— students beat the professor! 🎉' : ''}`;
+    $('answers').innerHTML = '';
+    $('btnValidate').classList.add('hidden');
+    $('explanation').style.display = 'none';
+  }
+
+  miniScores('miniScores', state.groups);
+}
+
+socket.on('gameState', s => {
+  if (s.serverNow) timeOffset = s.serverNow - Date.now();
+  if (s.correctAnswers !== undefined) correctAnswers = s.correctAnswers;
+  const newQuestion = s.phase === 'question' && (!state || state.phase !== 'question' ||
+    state.currentQuestionIndex !== s.currentQuestionIndex || state.currentRoundIndex !== s.currentRoundIndex);
+  if (newQuestion) { myPicks = []; submitted = false; }
+  if (s.phase === 'lobby') { myPicks = []; submitted = false; }
+  state = s;
+  renderPlay();
+});
+
+buildTeamCards();
+</script>
+</body>
+</html>

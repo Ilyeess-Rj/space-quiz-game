@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="helmet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fca5a5"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <linearGradient id="fire" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="45%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="rock" cx="35%" cy="35%" r="80%">
+      <stop offset="0%" stop-color="#a8a29e"/>
+      <stop offset="55%" stop-color="#57534e"/>
+      <stop offset="100%" stop-color="#292524"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="95" r="92" fill="url(#glow)"/>
+  <circle cx="150" cy="20" r="1.2" fill="#fff"/>
+
+  <!-- body -->
+  <rect x="62" y="118" width="76" height="62" rx="26" fill="url(#helmet)" stroke="#64748b" stroke-width="3"/>
+  <rect x="80" y="138" width="40" height="24" rx="6" fill="#0f172a"/>
+  <rect x="85" y="143" width="12" height="6" rx="2" fill="#ef4444"/>
+  <rect x="101" y="143" width="12" height="6" rx="2" fill="#f59e0b"/>
+  <!-- arms up in panic -->
+  <rect x="144" y="104" width="26" height="46" rx="13" fill="url(#helmet)" stroke="#64748b" stroke-width="3" transform="rotate(-25 157 127)"/>
+  <circle cx="172" cy="98" r="12" fill="#e2e8f0" stroke="#64748b" stroke-width="3"/>
+  <rect x="36" y="124" width="26" height="44" rx="13" fill="url(#helmet)" stroke="#64748b" stroke-width="3"/>
+  <!-- helmet -->
+  <circle cx="100" cy="76" r="52" fill="url(#helmet)" stroke="#64748b" stroke-width="4"/>
+  <circle cx="100" cy="76" r="40" fill="url(#visor)"/>
+  <!-- cracked visor -->
+  <path d="M100 40 L94 58 L106 70 L96 86 L104 100" stroke="#fecaca" stroke-width="2.4" fill="none" opacity=".9"/>
+  <path d="M106 70 L122 64" stroke="#fecaca" stroke-width="2" fill="none" opacity=".9"/>
+  <!-- scared face -->
+  <circle cx="100" cy="80" r="28" fill="#f8c98d"/>
+  <circle cx="90" cy="78" r="4.6" fill="#1f2937"/>
+  <circle cx="110" cy="78" r="4.6" fill="#1f2937"/>
+  <circle cx="91.5" cy="76.5" r="1.4" fill="#fff"/>
+  <circle cx="111.5" cy="76.5" r="1.4" fill="#fff"/>
+  <path d="M82 66 L96 70" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+  <path d="M118 66 L104 70" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="100" cy="95" rx="7" ry="8" fill="#1f2937"/>
+  <!-- sweat drop -->
+  <path d="M132 62 q6 10 0 13 q-6 -3 0 -13" fill="#7dd3fc"/>
+  <!-- warning badge -->
+  <path d="M160 138 L182 176 L138 176 Z" fill="#3b2f05" stroke="#f59e0b" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="157" y="150" width="6" height="14" rx="3" fill="#f59e0b"/>
+  <circle cx="160" cy="170" r="3.4" fill="#f59e0b"/>
+
+  <!-- METEORITE VERY CLOSE, drawn IN FRONT of the helmet: huge flaming rock diving at him -->
+  <g transform="translate(-14,-8)">
+    <!-- fire trail -->
+    <path d="M4 0 L60 34 L48 52 L0 22 Z" fill="url(#fire)" opacity=".85"/>
+    <path d="M0 12 L52 44" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" opacity=".8"/>
+    <path d="M8 2 L64 38" stroke="#fde68a" stroke-width="3" stroke-linecap="round" opacity=".9"/>
+    <path d="M0 30 L42 54" stroke="#f97316" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+    <!-- flames around rock -->
+    <path d="M52 22 Q46 36 54 44 Q40 44 42 58 Q30 52 36 66 Q26 64 32 76 L74 88 Q92 66 84 44 Q74 26 52 22 Z" fill="#f97316" opacity=".8"/>
+    <path d="M56 30 Q52 42 58 48 Q48 50 52 60 Q44 58 48 68 L72 76 Q82 58 74 44 Q68 34 56 30 Z" fill="#fbbf24" opacity=".85"/>
+    <!-- the rock itself, right against the helmet -->
+    <path d="M62 40 L82 36 L96 48 L98 66 L88 80 L68 84 L54 72 L52 54 Z" fill="url(#rock)" stroke="#1c1917" stroke-width="2.5"/>
+    <circle cx="72" cy="54" r="7" fill="#44403c"/>
+    <circle cx="72" cy="54" r="4" fill="#292524"/>
+    <circle cx="86" cy="66" r="4.6" fill="#44403c"/>
+    <circle cx="64" cy="70" r="3.4" fill="#44403c"/>
+    <path d="M58 44 L66 40" stroke="#d6d3d1" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+    <!-- impact warning lines toward astronaut -->
+    <path d="M104 56 L116 52 M106 70 L120 70 M102 84 L114 90" stroke="#ef4444" stroke-width="3.4" stroke-linecap="round"/>
+  </g>
+</svg>

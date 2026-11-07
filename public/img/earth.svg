@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <radialGradient id="spc" cx="50%" cy="45%" r="80%">
+      <stop offset="0%" stop-color="#0d1638"/>
+      <stop offset="100%" stop-color="#02020a"/>
+    </radialGradient>
+    <radialGradient id="earth" cx="38%" cy="32%" r="78%">
+      <stop offset="0%" stop-color="#7fd4ff"/>
+      <stop offset="38%" stop-color="#2e8fd6"/>
+      <stop offset="72%" stop-color="#124d8a"/>
+      <stop offset="100%" stop-color="#062a52"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="#4d9bff" stop-opacity=".32"/>
+      <stop offset="100%" stop-color="#4d9bff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="480" height="320" fill="url(#spc)"/>
+  <g fill="#fff">
+    <circle cx="44" cy="48" r="1.4" opacity=".8"/><circle cx="96" cy="26" r="1" opacity=".5"/>
+    <circle cx="380" cy="40" r="1.5" opacity=".85"/><circle cx="436" cy="96" r="1.1" opacity=".55"/>
+    <circle cx="60" cy="270" r="1.2" opacity=".6"/><circle cx="200" cy="24" r="1" opacity=".5"/>
+    <circle cx="410" cy="264" r="1.3" opacity=".7"/><circle cx="330" cy="290" r="1" opacity=".5"/>
+    <circle cx="140" cy="286" r="1.4" opacity=".75"/><circle cx="300" cy="18" r="1.1" opacity=".55"/>
+  </g>
+  <circle cx="240" cy="158" r="132" fill="url(#halo)"/>
+  <!-- Earth -->
+  <circle cx="240" cy="158" r="96" fill="url(#earth)"/>
+  <!-- continents -->
+  <g fill="#2f8f5b" opacity=".9">
+    <path d="M188 92 C 205 82, 232 88, 240 100 C 248 112, 232 124, 214 126 C 196 128, 178 116, 178 104 Z"/>
+    <path d="M256 118 C 276 112, 300 122, 306 140 C 312 158, 296 176, 276 176 C 256 176, 244 158, 246 140 Z"/>
+    <path d="M198 176 C 216 168, 242 176, 250 194 C 258 212, 240 228, 218 228 C 198 228, 184 212, 186 194 Z"/>
+    <path d="M268 196 C 282 192, 298 200, 300 212 C 302 224, 288 232, 276 230 C 264 228, 256 214, 262 204 Z"/>
+  </g>
+  <!-- clouds -->
+  <g fill="#ffffff" opacity=".42">
+    <ellipse cx="196" cy="112" rx="30" ry="12" transform="rotate(-18 196 112)"/>
+    <ellipse cx="286" cy="150" rx="40" ry="14" transform="rotate(12 286 150)"/>
+    <ellipse cx="220" cy="206" rx="34" ry="12" transform="rotate(-8 220 206)"/>
+    <ellipse cx="300" cy="90" rx="22" ry="9" transform="rotate(24 300 90)"/>
+  </g>
+  <!-- highlight -->
+  <ellipse cx="200" cy="112" rx="42" ry="30" fill="#ffffff" opacity=".13"/>
+  <!-- night shade -->
+  <path d="M240 62 A 96 96 0 0 1 240 254 A 70 96 0 0 0 240 62 Z" fill="#000" opacity=".22"/>
+  <text x="240" y="302" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700"
+        fill="#8fb6ff" text-anchor="middle" letter-spacing="3">LA TERRE · NOTRE PLANÈTE BLEUE</text>
+</svg>

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity=".4"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="helmet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="visor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="95" r="92" fill="url(#glow)"/>
+  <circle cx="35" cy="35" r="2" fill="#94a3b8"/>
+  <circle cx="170" cy="55" r="1.6" fill="#94a3b8"/>
+  <!-- body -->
+  <rect x="62" y="118" width="76" height="62" rx="26" fill="url(#helmet)" stroke="#1e293b" stroke-width="3"/>
+  <rect x="80" y="138" width="40" height="24" rx="6" fill="#0f172a"/>
+  <rect x="85" y="143" width="12" height="6" rx="2" fill="#334155"/>
+  <rect x="101" y="143" width="12" height="6" rx="2" fill="#334155"/>
+  <!-- limp arms -->
+  <rect x="36" y="124" width="26" height="44" rx="13" fill="url(#helmet)" stroke="#1e293b" stroke-width="3"/>
+  <rect x="138" y="124" width="26" height="44" rx="13" fill="url(#helmet)" stroke="#1e293b" stroke-width="3"/>
+  <!-- helmet -->
+  <circle cx="100" cy="76" r="52" fill="url(#helmet)" stroke="#1e293b" stroke-width="4"/>
+  <circle cx="100" cy="76" r="40" fill="url(#visor)"/>
+  <!-- skull face -->
+  <circle cx="100" cy="80" r="27" fill="#cbd5e1"/>
+  <circle cx="90" cy="76" r="6.5" fill="#0f172a"/>
+  <circle cx="110" cy="76" r="6.5" fill="#0f172a"/>
+  <path d="M96 90 L104 90 L100 96 Z" fill="#0f172a"/>
+  <rect x="88" y="100" width="24" height="7" rx="3" fill="#cbd5e1"/>
+  <path d="M92 100 v7 M100 100 v7 M108 100 v7" stroke="#0f172a" stroke-width="2.4"/>
+  <!-- cracks -->
+  <path d="M66 44 L76 58 L68 70" stroke="#94a3b8" stroke-width="2.4" fill="none"/>
+  <path d="M138 96 L128 106 L136 116" stroke="#94a3b8" stroke-width="2.4" fill="none"/>
+  <!-- dead badge -->
+  <circle cx="160" cy="160" r="22" fill="#2a0a0a" stroke="#ef4444" stroke-width="4"/>
+  <path d="M150 150 L170 170 M170 150 L150 170" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+  <!-- RIP halo -->
+  <ellipse cx="100" cy="14" rx="26" ry="8" fill="none" stroke="#94a3b8" stroke-width="4" opacity=".7"/>
+</svg>

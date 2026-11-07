@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Save the Astronaut — Host Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    background: radial-gradient(ellipse at 20% 10%, #1a0b3d 0%, #050515 55%, #010108 100%);
+    color: #ffffff;
+    display: grid;
+    grid-template-rows: 64px 1fr;
+  }
+  #cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  #cosmos .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle 3s infinite; }
+  @keyframes twinkle { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+  #cosmos .nebula { position: absolute; border-radius: 50%; filter: blur(70px); opacity: .35; }
+  #cosmos .planet {
+    position: absolute; border-radius: 50%;
+    box-shadow: inset -18px -12px 40px rgba(0,0,0,.7), 0 0 60px rgba(120,90,255,.25);
+  }
+
+  header {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    background: rgba(10, 12, 40, .75);
+    border-bottom: 1px solid #2d3a5e;
+    backdrop-filter: blur(6px);
+  }
+  header h1 {
+    font-size: 22px; letter-spacing: 2px;
+    background: linear-gradient(90deg, #7dd3fc, #a855f7, #fbbf24);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  #phaseBadge {
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    padding: 8px 22px; border-radius: 30px;
+    border: 1px solid #4a90d9;
+    background: linear-gradient(90deg, rgba(74,144,217,.2), rgba(168,85,247,.2));
+    color: #93c5fd; text-transform: uppercase;
+    box-shadow: 0 0 18px rgba(74,144,217,.35);
+  }
+
+  main {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 310px 1fr 330px;
+    gap: 16px;
+    padding: 16px 20px;
+    min-height: 0;
+  }
+  .panel {
+    background: rgba(15, 18, 48, .82);
+    border: 1px solid #2d3a5e;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 0;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    backdrop-filter: blur(4px);
+  }
+  .panel h2 { font-size: 13px; letter-spacing: 2px; color: #93c5fd; text-transform: uppercase; }
+
+  .btn {
+    border: 1px solid rgba(122,162,247,.55);
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 16px; font-weight: 700; letter-spacing: 1px;
+    color: #ffffff; cursor: pointer; text-transform: uppercase;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(90,140,255,.35), transparent 55%),
+      linear-gradient(180deg, #16224d 0%, #0b1236 100%);
+    box-shadow: 0 0 18px rgba(90,140,255,.25), inset 0 1px 0 rgba(255,255,255,.12);
+    transition: transform .12s, box-shadow .2s, filter .2s;
+    width: 100%;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(120,160,255,.55); filter: brightness(1.15); }
+  .btn:active { transform: translateY(1px); }
+  .btn.launch {
+    border-color: rgba(52,211,153,.6);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(52,211,153,.35), transparent 55%),
+      linear-gradient(180deg, #0d3d33 0%, #06251f 100%);
+    box-shadow: 0 0 20px rgba(52,211,153,.35), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .btn.rose {
+    border-color: rgba(244,114,182,.6);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(244,114,182,.3), transparent 55%),
+      linear-gradient(180deg, #3d0d2a 0%, #25061c 100%);
+  }
+
+  #qrBox { text-align: center; }
+  #qrBox img {
+    width: 100%; max-width: 240px; border-radius: 14px;
+    border: 2px solid #4a90d9;
+    box-shadow: 0 0 28px rgba(74,144,217,.5);
+    background: #fff; padding: 8px;
+  }
+  #playerUrl {
+    font-size: 14px; color: #7dd3fc; word-break: break-all;
+    padding: 8px; border-radius: 8px;
+    background: rgba(74,144,217,.12); border: 1px dashed #4a90d9;
+  }
+  #answeredCount { font-size: 15px; color: #fbbf24; text-align: center; }
+  #playerCount { font-size: 14px; color: #a5b4fc; text-align: center; }
+
+  #roundInfo { text-align: center; }
+  #roundTitle { font-size: 18px; font-weight: 800; color: #fbbf24; letter-spacing: 1px; }
+  #roundSub { font-size: 12px; color: #93c5fd; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+  #qCounter { font-size: 12px; color: #c4b5fd; letter-spacing: 3px; margin-top: 4px; }
+
+  #timerBox { display: none; text-align: center; margin-top: 8px; }
+  #timerNum { font-size: 30px; font-weight: 900; color: #7dd3fc; font-variant-numeric: tabular-nums; text-shadow: 0 0 16px rgba(125,211,252,.6); }
+  #timerNum.low { color: #ef4444; text-shadow: 0 0 16px rgba(239,68,68,.7); animation: pulse .5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+  #timerBarBg { height: 10px; border-radius: 6px; background: rgba(74,144,217,.15); overflow: hidden; margin-top: 6px; }
+  #timerBar { height: 100%; width: 100%; border-radius: 6px; background: linear-gradient(90deg, #34d399, #7dd3fc); transition: width .25s linear; }
+  #timerBar.low { background: linear-gradient(90deg, #ef4444, #f59e0b); }
+
+  #questionArea { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; }
+  #questionBox {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(74,144,217,.14), rgba(168,85,247,.14));
+    border: 1px solid #3b4a7a;
+  }
+  #questionText { font-size: 23px; font-weight: 800; line-height: 1.35; color: #ffffff; text-shadow: 0 0 20px rgba(122,162,247,.4); }
+  #questionImg { display: none; margin: 12px auto 0; height: 190px; border-radius: 12px; border: 1px solid #3b4a7a; box-shadow: 0 0 24px rgba(74,144,217,.35); }
+
+  #optionsGrid {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-auto-rows: 1fr;
+    gap: 12px;
+  }
+  .opt {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 2px solid #2d3a5e;
+    background: rgba(10, 14, 42, .8);
+    font-size: 17px; font-weight: 600; text-align: center;
+    color: #ffffff;
+    overflow: hidden; min-height: 0;
+  }
+  .opt img { max-height: 100%; max-width: 130px; border-radius: 8px; flex-shrink: 1; }
+  .opt .lbl { font-size: 16px; }
+  .opt.photo { flex-direction: column; gap: 8px; padding: 8px; }
+  .opt.photo img { width: 100%; height: calc(100% - 30px); max-width: 100%; max-height: 100%; object-fit: cover; flex: 1; min-height: 0; }
+  .opt.photo .lbl { font-size: 16px; flex-shrink: 0; }
+  .opt.correct {
+    border-color: #34d399;
+    background: linear-gradient(135deg, rgba(52,211,153,.25), rgba(16,185,129,.15));
+    box-shadow: 0 0 26px rgba(52,211,153,.55);
+    animation: pop .4s;
+  }
+  @keyframes pop { 0% { transform: scale(.94); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+  #explanation {
+    display: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(251,191,36,.5);
+    background: rgba(251,191,36,.1);
+    color: #fde68a; font-size: 14px; line-height: 1.45;
+  }
+
+  /* round summary survival panel */
+  #survivalPanel { display: none; flex: 1; min-height: 0; flex-direction: column; gap: 10px; justify-content: center; }
+  .survRow {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 12px; font-size: 17px; font-weight: 700;
+    background: rgba(10, 14, 42, .8); border: 1px solid #2d3a5e;
+  }
+  .survRow img { width: 44px; height: 44px; }
+  .survRow .saved { margin-left: auto; font-size: 15px; color: #93c5fd; }
+  .survRow .verdict { font-size: 15px; font-weight: 900; }
+  .survRow.ok { border-color: rgba(52,211,153,.5); }
+  .survRow.ok .verdict { color: #34d399; }
+  .survRow.dead { border-color: rgba(239,68,68,.5); }
+  .survRow.dead .verdict { color: #ef4444; }
+
+  #scoreboard { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .teamRow {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(10, 14, 42, .7);
+    border-left: 4px solid #555;
+  }
+  .teamRow .icon { font-size: 22px; }
+  .teamRow .astro { width: 36px; height: 36px; }
+  .teamRow .name { flex: 1; font-size: 16px; font-weight: 700; color: #ffffff; }
+  .teamRow .members { font-size: 11px; color: #a5b4fc; }
+  .teamRow .saves { font-size: 11px; color: #6ee7b7; }
+  .teamRow .pts { font-size: 22px; font-weight: 900; font-variant-numeric: tabular-nums; }
+  .teamRow .crown { font-size: 18px; }
+  .teamRow.lead {
+    background: linear-gradient(90deg, rgba(251,191,36,.18), rgba(251,191,36,.04));
+    border: 1px solid rgba(251,191,36,.45);
+    box-shadow: 0 0 18px rgba(251,191,36,.25);
+  }
+  .teamRow.dead { opacity: .45; border-color: rgba(239,68,68,.6); }
+  .teamRow.dead .name { text-decoration: line-through; }
+  .deadTag { font-size: 10px; color: #ef4444; font-weight: 900; letter-spacing: 1px; }
+  .bump { animation: bump .5s; }
+  @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25); color: #34d399; } 100% { transform: scale(1); } }
+
+  #winnerBox { display: none; text-align: center; flex: 1; }
+  #winnerBox .t { font-size: 20px; letter-spacing: 3px; color: #fbbf24; margin-bottom: 8px; }
+  #winnerBox .n { font-size: 34px; font-weight: 900; text-shadow: 0 0 24px rgba(251,191,36,.7); }
+  #winnerBox .s { font-size: 16px; color: #a5b4fc; margin-top: 6px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="cosmos"></div>
+
+<header>
+  <h1>🧑‍🚀 SAVE THE ASTRONAUT — AI &amp; SPACE QUIZ</h1>
+  <div id="phaseBadge">LOBBY</div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Join the game</h2>
+    <div id="qrBox"><img id="qrImg" alt="QR code"></div>
+    <div id="playerUrl"></div>
+    <div id="playerCount">0 players connected</div>
+    <h2>Host controls</h2>
+    <button id="btnStartRound" class="btn launch">🚀 Launch Round 1</button>
+    <button id="btnReveal" class="btn hidden">👁️ Reveal Answer</button>
+    <button id="btnNextQ" class="btn hidden">➡️ Next Question</button>
+    <button id="btnNextRound" class="btn launch hidden">🛸 Start Next Round</button>
+    <button id="btnReset" class="btn rose hidden">🔄 Restart Game</button>
+    <div id="answeredCount" class="hidden">0 / 0 answered</div>
+  </section>
+
+  <section class="panel">
+    <div id="roundInfo">
+      <div id="roundTitle"></div>
+      <div id="roundSub"></div>
+      <div id="qCounter"></div>
+      <div id="timerBox">
+        <div id="timerNum">30</div>
+        <div id="timerBarBg"><div id="timerBar"></div></div>
+      </div>
+    </div>
+    <div id="questionArea">
+      <div id="questionBox">
+        <div id="questionText">Waiting for the host to launch the game…</div>
+        <img id="questionImg" alt="">
+      </div>
+      <div id="optionsGrid"></div>
+      <div id="survivalPanel"></div>
+      <div id="explanation"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Live scoreboard</h2>
+    <div id="scoreboard"></div>
+    <div id="winnerBox">
+      <div class="t">🏆 MISSION WINNER 🏆</div>
+      <div class="n" id="winnerName"></div>
+      <div class="s" id="winnerScore"></div>
+      <div class="s" id="winnerNote"></div>
+    </div>
+  </section>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let state = null;
+let correctAnswers = [];
+let answered = 0;
+let timeOffset = 0;
+const prevScores = {};
+const $ = id => document.getElementById(id);
+
+// ---------- cosmos background ----------
+(function buildCosmos() {
+  const c = $('cosmos');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 1;
+    s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s`;
+    c.appendChild(s);
+  }
+  [['#4a1d96', '10%', '70%', '420px'], ['#0e4494', '75%', '20%', '380px'], ['#7c1d6f', '45%', '85%', '300px']].forEach(([col, x, y, sz]) => {
+    const n = document.createElement('div');
+    n.className = 'nebula';
+    n.style.cssText = `background:${col};left:${x};top:${y};width:${sz};height:${sz}`;
+    c.appendChild(n);
+  });
+  const p = document.createElement('div');
+  p.className = 'planet';
+  p.style.cssText = 'width:90px;height:90px;right:110px;bottom:-30px;background:radial-gradient(circle at 32% 30%, #c98a5e, #71341f)';
+  c.appendChild(p);
+  const p2 = document.createElement('div');
+  p2.className = 'planet';
+  p2.style.cssText = 'width:52px;height:52px;left:70px;top:130px;background:radial-gradient(circle at 32% 30%, #9fd4ff, #1d4f8f)';
+  c.appendChild(p2);
+})();
+
+// ---------- countdown ----------
+setInterval(() => {
+  const box = $('timerBox');
+  if (!state || state.phase !== 'question' || !state.questionStartedAt) {
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display = 'block';
+  const dur = state.questionDuration * 1000;
+  const remain = Math.max(0, dur - ((Date.now() + timeOffset) - state.questionStartedAt));
+  const secs = Math.ceil(remain / 1000);
+  const num = $('timerNum');
+  num.textContent = remain === 0 ? 'TIME UP' : secs + 's';
+  num.classList.toggle('low', secs <= 5);
+  $('timerBar').classList.toggle('low', secs <= 5);
+  $('timerBar').style.width = (100 * remain / dur) + '%';
+}, 200);
+
+// ---------- QR code ----------
+fetch('/api/qr').then(r => r.json()).then(d => {
+  $('qrImg').src = d.qr;
+  $('playerUrl').textContent = d.playerUrl;
+});
+
+function astroFor(team) {
+  const g = state.groups[team];
+  if (g.eliminated) return '/img/astronaut-dead.svg';
+  const r = (state.lastTeamResults || {})[team];
+  if (r === 'danger') return '/img/astronaut-danger.svg';
+  return '/img/astronaut-safe.svg';
+}
+
+function optionHtml(opt, i) {
+  if (opt.img) {
+    return `<div class="opt photo" id="opt${i}"><img src="${opt.img}" alt=""><span class="lbl">${opt.label}</span></div>`;
+  }
+  return `<div class="opt" id="opt${i}"><span class="lbl">${opt.text}</span></div>`;
+}
+
+function renderScoreboard() {
+  const entries = Object.entries(state.groups)
+    .map(([name, g]) => ({ name, ...g }))
+    .sort((a, b) => b.score - a.score);
+  const maxScore = entries[0].score;
+  const lead = maxScore > 0;
+  $('scoreboard').innerHTML = entries.map((t, idx) => {
+    const st = (state.teamStats || {})[t.name];
+    const saves = st && !t.eliminated ? `<div class="saves">🧑‍🚀 ${st.saved}/${st.total} saved this round</div>` : '';
+    return `
+    <div class="teamRow ${lead && t.score === maxScore ? 'lead' : ''} ${t.eliminated ? 'dead' : ''}" style="border-left-color:${t.color}">
+      <img class="astro" src="${astroFor(t.name)}" alt="">
+      <div class="icon">${t.icon}</div>
+      <div class="name">${t.name}${t.eliminated ? ' <span class="deadTag">ELIMINATED</span>' : ''}
+        <div class="members">${t.members} player${t.members === 1 ? '' : 's'}</div>${saves}</div>
+      <div class="crown">${lead && t.score === maxScore && !t.eliminated ? '👑' : ''}</div>
+      <div class="pts" style="color:${t.color}" id="pts-${t.name.replace(/\W/g, '')}">${t.score}</div>
+    </div>`;
+  }).join('');
+  entries.forEach(t => {
+    const key = t.name.replace(/\W/g, '');
+    const el = $('pts-' + key);
+    if (prevScores[t.name] !== undefined && prevScores[t.name] < t.score && el) el.classList.add('bump');
+    prevScores[t.name] = t.score;
+  });
+}
+
+function setButtons() {
+  const phase = state.phase;
+  $('btnStartRound').classList.toggle('hidden', phase !== 'lobby');
+  $('btnReveal').classList.toggle('hidden', phase !== 'question');
+  $('btnNextQ').classList.toggle('hidden', phase !== 'question_result');
+  $('btnNextRound').classList.toggle('hidden', phase !== 'round_summary');
+  $('btnReset').classList.toggle('hidden', phase !== 'game_over');
+  const lastRound = state.currentRoundIndex === 3;
+  const survivors = Object.entries(state.groups).filter(([n, g]) => g.members > 0 && !g.eliminated).length;
+  $('btnNextRound').textContent = (lastRound || survivors === 0) ? '🏁 See Final Results' : '🛸 Start Next Round';
+  $('btnStartRound').textContent = `🚀 Launch Round ${state.currentRoundIndex + 1}`;
+  $('answeredCount').classList.toggle('hidden', phase !== 'question');
+  $('answeredCount').textContent = `${answered} / ${state.players ? Object.keys(state.players).length : 0} answered`;
+}
+
+function renderWinner() {
+  const all = Object.entries(state.groups).map(([n, g]) => ({ n, ...g }));
+  const survivors = all.filter(t => !t.eliminated && t.members > 0).sort((a, b) => b.score - a.score);
+  const w = survivors.length ? survivors[0] : all.sort((a, b) => b.score - a.score)[0];
+  $('winnerName').textContent = `${w.icon} ${w.n}`;
+  $('winnerScore').textContent = `${w.score} points — astronaut saved! 🧑‍🚀`;
+  const chokri = all.find(t => t.n === 'MR.Chokri');
+  $('winnerNote').textContent = !survivors.length
+    ? 'No team survived the mission… 💀'
+    : (w.n !== 'MR.Chokri' && chokri && (chokri.eliminated || chokri.score < w.score) ? 'The students BEAT the professor! 🎉' : (w.n === 'MR.Chokri' ? 'The professor wins… students must train harder! 😎' : ''));
+  $('scoreboard').classList.add('hidden');
+  $('winnerBox').style.display = 'block';
+}
+
+function render() {
+  $('phaseBadge').textContent = {
+    lobby: 'LOBBY — WAITING FOR TEAMS',
+    question: 'QUESTION IN PROGRESS',
+    question_result: 'ANSWER REVEALED',
+    round_summary: 'ELIMINATION ROUND RESULTS',
+    game_over: 'GAME OVER'
+  }[state.phase];
+
+  const round = state.currentRoundData;
+  $('roundTitle').textContent = round ? round.title : '';
+  $('roundSub').textContent = round ? round.subtitle : '';
+  $('survivalPanel').style.display = 'none';
+  $('optionsGrid').innerHTML = '';
+
+  if (state.phase === 'lobby') {
+    $('qCounter').textContent = 'SCAN THE QR CODE TO JOIN';
+    $('questionText').textContent = 'Save your astronaut! Answer at least HALF of each round correctly or your team is eliminated…';
+    $('questionImg').style.display = 'none';
+    $('explanation').style.display = 'none';
+    $('scoreboard').classList.remove('hidden');
+    $('winnerBox').style.display = 'none';
+  }
+
+  if (state.phase === 'question' || state.phase === 'question_result') {
+    const q = round.questions[state.currentQuestionIndex];
+    $('qCounter').textContent = `QUESTION ${state.currentQuestionIndex + 1} / ${round.questions.length}${q.multi ? ' — MULTIPLE CORRECT ANSWERS' : ''}`;
+    $('questionText').textContent = q.q;
+    if (q.image) { $('questionImg').src = q.image; $('questionImg').style.display = 'block'; }
+    else { $('questionImg').style.display = 'none'; }
+    $('optionsGrid').innerHTML = q.options.map((o, i) => optionHtml(o, i)).join('');
+    $('explanation').style.display = 'none';
+    if (state.phase === 'question_result') {
+      correctAnswers.forEach(i => { const el = $('opt' + i); if (el) el.classList.add('correct'); });
+      $('explanation').textContent = '💡 ' + q.explanation;
+      $('explanation').style.display = 'block';
+    }
+    $('scoreboard').classList.remove('hidden');
+    $('winnerBox').style.display = 'none';
+  }
+
+  if (state.phase === 'round_summary') {
+    $('qCounter').textContent = 'ROUND COMPLETE — SURVIVAL CHECK';
+    $('questionText').textContent = `End of Round ${round.round}: teams that saved less than HALF of their astronaut checks are ELIMINATED!`;
+    $('questionImg').style.display = 'none';
+    $('explanation').style.display = 'none';
+    const results = state.roundResults || [];
+    $('survivalPanel').innerHTML = results.map(r => `
+      <div class="survRow ${r.survived ? 'ok' : 'dead'}">
+        <img src="${r.survived ? '/img/astronaut-safe.svg' : '/img/astronaut-dead.svg'}" alt="">
+        <span style="color:${state.groups[r.team].color}">${state.groups[r.team].icon} ${r.team}</span>
+        <span class="saved">${r.saved}/${r.total} saved</span>
+        <span class="verdict">${r.survived ? 'SURVIVED ✅' : 'ELIMINATED 💀'}</span>
+      </div>`).join('') || '<div class="survRow">No active teams this round.</div>';
+    $('survivalPanel').style.display = 'flex';
+    $('scoreboard').classList.remove('hidden');
+    $('winnerBox').style.display = 'none';
+  }
+
+  if (state.phase === 'game_over') {
+    $('qCounter').textContent = 'MISSION COMPLETE';
+    $('questionText').textContent = 'The mission is over. Final results on the right!';
+    $('questionImg').style.display = 'none';
+    $('explanation').style.display = 'none';
+    renderWinner();
+  }
+
+  $('playerCount').textContent = `${Object.keys(state.players || {}).length} player(s) connected`;
+  renderScoreboard();
+  setButtons();
+}
+
+socket.on('gameState', s => {
+  if (s.serverNow) timeOffset = s.serverNow - Date.now();
+  if (s.correctAnswers !== undefined) { correctAnswers = s.correctAnswers; answered = 0; }
+  if (s.phase === 'question') answered = 0;
+  state = s;
+  render();
+});
+
+socket.on('playerAnswered', () => {
+  answered++;
+  if (state) setButtons();
+});
+
+$('btnStartRound').onclick = () => socket.emit('host:startRound');
+$('btnReveal').onclick = () => socket.emit('host:revealAnswer');
+$('btnNextQ').onclick = () => socket.emit('host:nextQuestion');
+$('btnNextRound').onclick = () => socket.emit('host:nextRound');
+$('btnReset').onclick = () => socket.emit('host:resetGame');
+</script>
+</body>
+</html>

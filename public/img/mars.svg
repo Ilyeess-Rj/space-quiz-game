@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" width="480" height="320">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a1a10"/>
+      <stop offset="40%" stop-color="#8a3f1c"/>
+      <stop offset="100%" stop-color="#c2703a"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a3b1c"/>
+      <stop offset="100%" stop-color="#3a1a0c"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2d9b8"/>
+      <stop offset="50%" stop-color="#c9a878"/>
+      <stop offset="100%" stop-color="#8a6d48"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff4c4"/>
+      <stop offset="45%" stop-color="#ffd166"/>
+      <stop offset="100%" stop-color="#ff9d00" stop-opacity=".2"/>
+    </radialGradient>
+  </defs>
+  <rect width="480" height="320" fill="url(#sky)"/>
+  <circle cx="380" cy="70" r="46" fill="url(#sun)" opacity=".9"/>
+  <circle cx="380" cy="70" r="22" fill="#fff6d6"/>
+  <!-- distant hills -->
+  <path d="M0 210 L70 176 L140 200 L220 168 L300 196 L380 172 L480 200 L480 320 L0 320 Z" fill="#6b3116" opacity=".85"/>
+  <!-- ground -->
+  <path d="M0 244 L90 226 L180 248 L270 230 L360 250 L480 232 L480 320 L0 320 Z" fill="url(#ground)"/>
+  <!-- rocks -->
+  <ellipse cx="90" cy="286" rx="20" ry="9" fill="#5c2a12"/>
+  <ellipse cx="330" cy="296" rx="26" ry="11" fill="#5c2a12"/>
+  <ellipse cx="410" cy="282" rx="14" ry="7" fill="#6b3116"/>
+  <!-- Rover -->
+  <g transform="translate(238 226)">
+    <!-- wheels -->
+    <g fill="#241a12" stroke="#0f0a06" stroke-width="2">
+      <circle cx="-58" cy="40" r="18"/><circle cx="-18" cy="44" r="18"/>
+      <circle cx="24" cy="44" r="18"/><circle cx="64" cy="40" r="18"/>
+    </g>
+    <g fill="#7d8aa5">
+      <circle cx="-58" cy="40" r="7"/><circle cx="-18" cy="44" r="7"/>
+      <circle cx="24" cy="44" r="7"/><circle cx="64" cy="40" r="7"/>
+    </g>
+    <!-- suspension -->
+    <g stroke="#8a6d48" stroke-width="3" stroke-linecap="round">
+      <path d="M-58 40 L-46 16"/><path d="M-18 44 L-10 18"/>
+      <path d="M24 44 L30 18"/><path d="M64 40 L54 16"/>
+    </g>
+    <!-- body -->
+    <rect x="-70" y="-16" width="148" height="36" rx="10" fill="url(#body)" stroke="#6a5136" stroke-width="2"/>
+    <rect x="-52" y="-8" width="42" height="18" rx="4" fill="#2b3d5c"/>
+    <rect x="-6" y="-8" width="60" height="18" rx="4" fill="#36496b"/>
+    <!-- mast -->
+    <rect x="34" y="-56" width="6" height="42" rx="3" fill="#9aa7bf"/>
+    <!-- camera head -->
+    <rect x="20" y="-74" width="34" height="24" rx="6" fill="#dbe6f7" stroke="#7a8aa8" stroke-width="2"/>
+    <circle cx="37" cy="-62" r="7" fill="#1b5fa8"/>
+    <circle cx="34" cy="-65" r="2.4" fill="#7fd4ff"/>
+    <!-- antenna -->
+    <path d="M52 -74 L70 -100" stroke="#9aa7bf" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="71" cy="-101" r="4" fill="#22e08a"/>
+    <!-- arm -->
+    <path d="M-70 8 L-96 22 L-96 40" stroke="#b89a6e" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <circle cx="-96" cy="42" r="5" fill="#dbe6f7"/>
+  </g>
+  <!-- tracks -->
+  <g stroke="#5c2a12" stroke-width="2" opacity=".6">
+    <path d="M120 300 L170 292"/><path d="M300 306 L360 300"/>
+  </g>
+  <text x="240" y="44" font-family="Segoe UI, sans-serif" font-size="13" font-weight="700"
+        fill="#8fb6ff" text-anchor="middle" letter-spacing="3">ROVER PERSÉVÉRANCE · MARS</text>
+</svg>

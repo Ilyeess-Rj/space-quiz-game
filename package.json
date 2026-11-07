@@ -1,0 +1,15 @@
+{
+  "name": "save-the-astronaut-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Save the Astronaut — AI & space classroom quiz with QR join, live host dashboard, timer and elimination rounds",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1"
+  }
+}
