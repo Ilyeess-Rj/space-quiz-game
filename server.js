@@ -164,16 +164,51 @@ const roundsData = [
         explanation: "AI processes petabytes of data: crater detection, mineral classification, spotting volcanic plumes, space weather forecasting, autonomous mapping..."
       },
       {
-        q: "In this quiz, which team represents YOUR PROFESSOR MR. CHOKRI that students must BEAT?",
-        image: "/img/victory.svg",
+        q: "Look at these photos: who was the FIRST HUMAN to travel into space?",
         options: [
-          { text: "Alpha" },
-          { text: "Geforce" },
-          { text: "Beta" },
-          { text: "MR.Chokri" }
+          { img: "/img/real/gagarin.jpg", label: "Photo A" },
+          { img: "/img/real/armstrong.jpg", label: "Photo B" },
+          { img: "/img/real/aldrin.jpg", label: "Photo C" },
+          { img: "/img/real/shepard.jpg", label: "Photo D" }
         ],
-        answer: 3,
-        explanation: "Team MR.Chokri is reserved for the professor. The student teams (Alpha, Geforce, Beta, Antigravity) must outscore him to win!"
+        answer: 0,
+        explanation: "Photo A is Yuri Gagarin: on 12 April 1961 he became the first human in space aboard Vostok 1, orbiting Earth once in 108 minutes."
+      },
+      {
+        q: "MULTIPLE ANSWERS — An INTELLIGENT SATELLITE uses AI. What can it do on its own? Select ALL correct answers.",
+        multi: true,
+        image: "/img/icon-satellite.svg",
+        options: [
+          { text: "Detect objects such as ships, fires or storms in the images it takes" },
+          { text: "Analyze its data and send only the useful parts back to Earth" },
+          { text: "Point its camera at interesting events without waiting for commands" },
+          { text: "Build a repair workshop in orbit" }
+        ],
+        answer: [0, 1, 2],
+        explanation: "Intelligent satellites filter and interpret their own images, then focus on what matters. Building a workshop in orbit is still science fiction!"
+      },
+      {
+        q: "Which AI system lets a Mars rover choose its own path and science targets?",
+        image: "/img/mars.svg",
+        options: [
+          { img: "/img/icon-rover.svg", label: "AutoNav" },
+          { img: "/img/icon-telescope.svg", label: "StarTracker" },
+          { img: "/img/icon-gold.svg", label: "GoldFinder" },
+          { img: "/img/icon-helmet.svg", label: "HelmetCam" }
+        ],
+        answer: 0,
+        explanation: "Perseverance uses AutoNav to drive around rocks by itself and even picks where to drill. The other names are invented!"
+      },
+      {
+        q: "Why does a spacecraft need AI when it is very far from Earth, for example near Mars?",
+        options: [
+          { text: "Radio signals take several minutes to arrive, so it must decide on its own" },
+          { text: "Because Wi-Fi does not exist in space" },
+          { text: "Because astronauts forget their instructions" },
+          { text: "Because AI makes the rocket lighter" }
+        ],
+        answer: 0,
+        explanation: "The signal delay to Mars reaches 5 to 20 minutes. If a meteorite is coming, waiting for Earth's answer is too late — the AI must react alone."
       }
     ]
   }

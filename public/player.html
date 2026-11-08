@@ -154,6 +154,14 @@
   /* eliminated screen */
   #deadAstro { width: 180px; height: 180px; margin: 0 auto; display: block; }
   #deadTitle { text-align: center; font-size: 24px; font-weight: 900; color: #ef4444; letter-spacing: 1px; }
+  #deadMsg { font-size: 16px; color: #fca5a5; margin: 10px 0; }
+  #deadWinner { color: #34d399; font-weight: 700; font-size: 15px; }
+  #resultBanner {
+    text-align: center; font-size: 21px; font-weight: 900; line-height: 1.35;
+    padding: 16px; border-radius: 14px; color: #d1fae5;
+    border: 2px solid rgba(52,211,153,.55); background: rgba(52,211,153,.12);
+  }
+  #resultBanner .line { display: block; font-size: 15px; font-weight: 600; margin-top: 8px; color: #e2e8f0; }
 </style>
 </head>
 <body>
@@ -187,6 +195,7 @@
 
 <!-- PLAY SCREEN -->
 <div class="screen hidden" id="playScreen">
+  <div id="resultBanner" class="hidden"></div>
   <div class="card">
     <div id="astroBox">
       <div id="dangerTrack">
@@ -222,7 +231,9 @@
 <div class="screen hidden" id="deadScreen">
   <img id="deadAstro" src="/img/astronaut-dead.svg" alt="dead astronaut">
   <div id="deadTitle">YOUR ASTRONAUT DIDN'T SURVIVE 💀</div>
+  <div id="deadMsg"></div>
   <div class="sub">Your team is ELIMINATED. You can still watch the mission and cheer for the survivors!</div>
+  <div id="deadWinner"></div>
   <div class="card">
     <div class="sub" style="margin-bottom:10px">LIVE SCORES</div>
     <div id="miniScoresDead"></div>
@@ -451,16 +462,43 @@ function updateAstronaut() {
   }
 }
 
+const WIN_LINES = [
+  "You saved my life! I'm naming a crater after you 🚀",
+  "You saved my life! Free zero-gravity hugs for the whole team 🫂",
+  "You saved my life! My helmet is yours forever 🧑‍🚀"
+];
+const LOSS_LINES = [
+  "Houston, we have a problem… I'm now a very stylish ghost 👻",
+  "Don't cry: I always dreamed of becoming a constellation 💀",
+  "My spacesuit is off to the museum. Send pizza! 🍕👻"
+];
+const pickLine = (arr, seed) =>
+  arr[[...seed].reduce((a, c) => a + c.charCodeAt(0), 0) % arr.length];
+
+function winnerOf(s) {
+  const all = Object.entries(s.groups).map(([n, g]) => ({ n, ...g })).sort((a, b) => b.score - a.score);
+  const survivors = all.filter(t => !t.eliminated && t.members > 0);
+  return survivors.length ? survivors[0] : all[0];
+}
+
 function renderPlay() {
   const g = state.groups[myGroup];
   const round = state.currentRoundData;
   const q = round ? round.questions[state.currentQuestionIndex] : null;
+  $('resultBanner').classList.add('hidden');
 
   // ---- eliminated = spectator screen ----
   if (g && g.eliminated) {
     $('waitScreen').classList.add('hidden');
     $('playScreen').classList.add('hidden');
     $('deadScreen').classList.remove('hidden');
+    $('deadMsg').textContent = `🧑‍🚀 "${pickLine(LOSS_LINES, myGroup)}"`;
+    if (state.phase === 'game_over') {
+      const w = winnerOf(state);
+      $('deadWinner').textContent = `🏆 WINNER: ${w.icon} ${w.n} (${w.score} pts) — "${pickLine(WIN_LINES, w.n)}"`;
+    } else {
+      $('deadWinner').textContent = '';
+    }
     miniScores('miniScoresDead', state.groups);
     return;
   }
@@ -537,11 +575,14 @@ function renderPlay() {
 
   if (state.phase === 'game_over') {
     const sorted = Object.entries(state.groups).map(([n, g]) => ({ n, ...g })).sort((a, b) => b.score - a.score);
-    const survivors = sorted.filter(t => !t.eliminated && t.members > 0);
-    const w = survivors.length ? survivors[0] : sorted[0];
+    const w = winnerOf(state);
     const chokri = sorted.find(t => t.n === 'MR.Chokri');
     $('statusBar').className = w.n === 'MR.Chokri' ? 'ko' : 'ok';
     $('statusBar').textContent = `🏆 WINNER: ${w.icon} ${w.n} (${w.score} pts) ${w.n !== 'MR.Chokri' && chokri && (chokri.eliminated || chokri.score < w.score) ? '— students beat the professor! 🎉' : ''}`;
+    const banner = $('resultBanner');
+    banner.classList.remove('hidden');
+    banner.innerHTML = `🏆 ${w.icon} ${w.n} WINS — ${w.score} pts` +
+      `<span class="line">🧑‍🚀 "${pickLine(WIN_LINES, w.n)}"${myGroup === w.n ? " — THAT'S YOU! 🎉" : ''}</span>`;
     $('answers').innerHTML = '';
     $('btnValidate').classList.add('hidden');
     $('explanation').style.display = 'none';
