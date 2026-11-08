@@ -18,7 +18,7 @@ const roundsData = [
     round: 1,
     title: "ROUND 1 — THE FIRST STEPS OF HUMANITY IN SPACE",
     subtitle: "Space history • Easy level",
-    duration: 30,
+    duration: 12,
     questions: [
       {
         q: "On 4 October 1957, which COUNTRY started the Space Age by launching Sputnik 1?",
@@ -56,7 +56,7 @@ const roundsData = [
       {
         q: "MULTIPLE ANSWERS — During the APOLLO 11 mission, what REALLY happened? Select ALL correct answers.",
         multi: true,
-        duration: 40,
+        duration: 12,
         options: [
           { text: "Two astronauts walked on the surface of the Moon" },
           { text: "The crew returned safely to Earth" },
@@ -72,12 +72,12 @@ const roundsData = [
     round: 2,
     title: "ROUND 2 — ARTIFICIAL INTELLIGENCE SERVING SPACE",
     subtitle: "Core concepts • Medium level",
-    duration: 25,
+    duration: 12,
     questions: [
       {
         q: "MULTIPLE ANSWERS — According to the presentation, what does ARTIFICIAL INTELLIGENCE enable machines to do? Select ALL correct answers.",
         multi: true,
-        duration: 35,
+        duration: 12,
         image: "/img/aibrain.svg",
         options: [
           { text: "Learn from data" },
@@ -106,7 +106,7 @@ const roundsData = [
     round: 3,
     title: "ROUND 3 — FROM HUMANS TO MACHINES: THE EVOLUTION",
     subtitle: "Past vs Present • Hard level",
-    duration: 20,
+    duration: 12,
     questions: [
       {
         q: "What is the MAJOR difference between space exploration in the PAST and TODAY?",
@@ -134,7 +134,7 @@ const roundsData = [
       {
         q: "MULTIPLE ANSWERS — Which of these are REAL applications of AI in space? Select ALL correct answers.",
         multi: true,
-        duration: 35,
+        duration: 12,
         options: [
           { text: "Autonomous rover navigation (AutoNav)" },
           { text: "Detecting craters and objects in satellite images" },
@@ -150,7 +150,7 @@ const roundsData = [
     round: 4,
     title: "ROUND 4 — FINAL MISSION: SPACE AI EXPERTISE",
     subtitle: "Advanced challenges • Expert level",
-    duration: 15,
+    duration: 12,
     questions: [
       {
         q: "In the analysis of scientific space data (petabytes of images, spectra, telemetry), what is the KEY role of AI?",
