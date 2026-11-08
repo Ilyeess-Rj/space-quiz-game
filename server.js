@@ -285,10 +285,29 @@ function beginRound() {
 io.on('connection', (socket) => {
   broadcast();
 
-  socket.on('joinGame', ({ name, group }) => {
+  socket.on('joinGame', ({ name, group, clientId }) => {
     if (!gameState.groups[group]) return;
-    gameState.players[socket.id] = { name, group };
-    gameState.groups[group].members++;
+    const clean = String(name || '').trim().slice(0, 24);
+    if (!clean) return;
+
+    // a reconnecting device replaces its stale session instead of double-counting
+    for (const [id, p] of Object.entries(gameState.players)) {
+      if (id === socket.id) continue;
+      const sameDevice = clientId && p.clientId === clientId;
+      const samePlayer = !clientId && p.name === clean && p.group === group;
+      if (sameDevice || samePlayer) {
+        gameState.groups[p.group].members = Math.max(0, gameState.groups[p.group].members - 1);
+        delete gameState.players[id];
+        delete gameState.answersThisQuestion[id];
+      }
+    }
+
+    const prev = gameState.players[socket.id];
+    if (prev && prev.group !== group) {
+      gameState.groups[prev.group].members = Math.max(0, gameState.groups[prev.group].members - 1);
+    }
+    if (!prev || prev.group !== group) gameState.groups[group].members++;
+    gameState.players[socket.id] = { name: clean, group, clientId: clientId || null };
     broadcast();
   });
 

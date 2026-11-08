@@ -133,7 +133,7 @@
     box-shadow: 0 4px 18px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.1);
   }
   .answer:hover:not(:disabled) { transform: translateY(-3px) scale(1.02); box-shadow: 0 0 26px rgba(120,160,255,.5); border-color: #4a90d9; }
-  .answer:disabled { opacity: .55; cursor: default; }
+  .answer:disabled { opacity: .8; cursor: default; }
   .answer img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
   .answer.wide { grid-column: 1 / -1; min-height: 70px; }
   .answer.correct { border-color: #34d399 !important; background: linear-gradient(180deg, #0d3d33, #06251f); box-shadow: 0 0 26px rgba(52,211,153,.6) !important; opacity: 1 !important; }
@@ -234,11 +234,24 @@
 const socket = io();
 const $ = id => document.getElementById(id);
 let myGroup = null;
+let myName = '';
+let joined = false;
+let lastAnswer = null;
 let myPicks = [];
 let submitted = false;
 let state = null;
 let correctAnswers = [];
 let timeOffset = 0;
+
+// stable device id: lets the server replace a stale session after a network drop
+const CLIENT_ID = (() => {
+  let id = localStorage.getItem('sq_cid');
+  if (!id) {
+    id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('sq_cid', id);
+  }
+  return id;
+})();
 
 (function buildCosmos() {
   const c = $('cosmos');
@@ -309,10 +322,21 @@ function updateJoinBtn() {
 
 $('nameInput').addEventListener('input', updateJoinBtn);
 $('btnJoin').onclick = () => {
-  socket.emit('joinGame', { name: $('nameInput').value.trim(), group: myGroup });
+  myName = $('nameInput').value.trim();
+  joined = true;
+  socket.emit('joinGame', { name: myName, group: myGroup, clientId: CLIENT_ID });
   $('joinScreen').classList.add('hidden');
   $('waitScreen').classList.remove('hidden');
 };
+
+// after a network drop the server forgets the socket: re-join and re-send a pending answer
+socket.on('connect', () => {
+  if (!joined || !myName || !myGroup) return;
+  socket.emit('joinGame', { name: myName, group: myGroup, clientId: CLIENT_ID });
+  if (submitted && lastAnswer && state && state.phase === 'question') {
+    socket.emit('submitAnswer', lastAnswer);
+  }
+});
 
 function miniScores(elId, groups) {
   $(elId).innerHTML = Object.entries(groups)
@@ -348,6 +372,7 @@ function renderAnswers(q) {
       } else {
         myPicks = [i];
         submitted = true;
+        lastAnswer = { answerIndex: i };
         socket.emit('submitAnswer', { answerIndex: i });
         document.querySelectorAll('.answer').forEach(x => { x.disabled = true; x.classList.remove('picked'); });
         a.classList.add('picked');
@@ -373,6 +398,7 @@ function renderAnswers(q) {
 $('btnValidate').onclick = () => {
   if (myPicks.length === 0 || submitted) return;
   submitted = true;
+  lastAnswer = { answers: myPicks };
   socket.emit('submitAnswer', { answers: myPicks });
   $('btnValidate').classList.add('hidden');
   document.querySelectorAll('.answer').forEach(x => x.disabled = true);
@@ -522,8 +548,8 @@ socket.on('gameState', s => {
   if (s.correctAnswers !== undefined) correctAnswers = s.correctAnswers;
   const newQuestion = s.phase === 'question' && (!state || state.phase !== 'question' ||
     state.currentQuestionIndex !== s.currentQuestionIndex || state.currentRoundIndex !== s.currentRoundIndex);
-  if (newQuestion) { myPicks = []; submitted = false; }
-  if (s.phase === 'lobby') { myPicks = []; submitted = false; }
+  if (newQuestion) { myPicks = []; submitted = false; lastAnswer = null; }
+  if (s.phase === 'lobby') { myPicks = []; submitted = false; lastAnswer = null; }
   state = s;
   renderPlay();
 });
