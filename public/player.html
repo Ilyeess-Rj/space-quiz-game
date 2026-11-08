@@ -347,7 +347,7 @@ socket.on('disconnect', () => {
 
 function miniScores(elId, groups) {
   $(elId).innerHTML = Object.entries(groups)
-    .map(([n, g]) => `<span class="chip" style="border-color:${g.color};background:${g.color}33">${g.icon} ${n}${g.eliminated ? ' 💀' : ''} · ${g.score}</span>`)
+    .map(([n, g]) => `<span class="chip" style="border-color:${g.color};background:${g.color}33">${g.icon} ${n}${g.eliminated ? ' 💀' : ''} · ${g.score} pts</span>`)
     .join('');
 }
 
