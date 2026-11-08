@@ -8,6 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.static('public'));
+app.get('/', (req, res) => res.redirect('/host.html'));
 
 // Option format: { text: "..." } OR { img: "/img/real/x.jpg", label: "caption" }
 // Question.answer: number (single) OR array (multi-select, exact match required)
