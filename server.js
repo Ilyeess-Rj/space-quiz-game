@@ -431,8 +431,13 @@ io.on('connection', (socket) => {
     gameState.teamStats = {};
     gameState.lastTeamResults = {};
     gameState.roundResults = [];
+    // rebuild member counts from the sockets that are still connected: nothing from the old game survives
+    const connected = {};
+    for (const p of Object.values(gameState.players)) {
+      connected[p.group] = (connected[p.group] || 0) + 1;
+    }
     for (const [name, g] of Object.entries(gameState.groups)) {
-      gameState.groups[name] = { ...newGroup(g.color, g.icon), members: g.members };
+      gameState.groups[name] = { ...newGroup(g.color, g.icon), members: connected[name] || 0 };
     }
     broadcast();
   });

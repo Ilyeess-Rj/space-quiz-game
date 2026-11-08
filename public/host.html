@@ -241,7 +241,7 @@
     <button id="btnReveal" class="btn hidden">👁️ Reveal Answer</button>
     <button id="btnNextQ" class="btn hidden">➡️ Next Question</button>
     <button id="btnNextRound" class="btn launch hidden">🛸 Start Next Round</button>
-    <button id="btnReset" class="btn rose hidden">🔄 Restart Game</button>
+    <button id="btnReset" class="btn rose">🔄 New Game (reset scores)</button>
     <div id="answeredCount" class="hidden">0 / 0 answered</div>
   </section>
 
@@ -386,7 +386,7 @@ function setButtons() {
   $('btnReveal').classList.toggle('hidden', phase !== 'question');
   $('btnNextQ').classList.toggle('hidden', phase !== 'question_result');
   $('btnNextRound').classList.toggle('hidden', phase !== 'round_summary');
-  $('btnReset').classList.toggle('hidden', phase !== 'game_over');
+  $('btnReset').classList.toggle('hidden', false);
   const lastRound = state.currentRoundIndex === 3;
   const survivors = Object.entries(state.groups).filter(([n, g]) => g.members > 0 && !g.eliminated).length;
   $('btnNextRound').textContent = (lastRound || survivors === 0) ? '🏁 See Final Results' : '🛸 Start Next Round';
@@ -507,7 +507,10 @@ $('btnStartRound').onclick = () => socket.emit('host:startRound');
 $('btnReveal').onclick = () => socket.emit('host:revealAnswer');
 $('btnNextQ').onclick = () => socket.emit('host:nextQuestion');
 $('btnNextRound').onclick = () => socket.emit('host:nextRound');
-$('btnReset').onclick = () => socket.emit('host:resetGame');
+$('btnReset').onclick = () => {
+  if (!confirm('Start a NEW game? Every score, elimination and round result will be erased.')) return;
+  socket.emit('host:resetGame');
+};
 </script>
 </body>
 </html>
