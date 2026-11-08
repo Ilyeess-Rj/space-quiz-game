@@ -206,20 +206,37 @@ let gameState = {
 
 function getLocalIp() {
   const nets = os.networkInterfaces();
-  for (const name of Object.keys(nets)) {
-    for (const net of nets[name]) {
-      if (net.family === 'IPv4' && !net.internal) return net.address;
+  let best = null;
+  let bestScore = -Infinity;
+  for (const [name, addrs] of Object.entries(nets)) {
+    for (const net of addrs || []) {
+      if (net.family !== 'IPv4' || net.internal) continue;
+      const ip = net.address;
+      const iface = name.toLowerCase();
+      let score = 0;
+      if (/^192\.168\./.test(ip)) score += 30;
+      else if (/^10\./.test(ip)) score += 20;
+      else if (/^172\.(1[6-9]|2\d|3[01])\./.test(ip)) score += 10;
+      if (/wi-?fi|wlan|ethernet|^eth\d*$|^en\d+$/.test(iface)) score += 5;
+      // virtual adapters are usually unreachable from phones
+      if (/vethernet|vmware|virtualbox|hyper-?v|wsl|docker|loopback|tailscale|zerotier|hamachi|radmin|bluetooth|^tap|^tun/.test(iface)) score -= 40;
+      if (/^169\.254\./.test(ip)) score -= 100;
+      if (score > bestScore) { bestScore = score; best = ip; }
     }
   }
-  return 'localhost';
+  return best || 'localhost';
 }
 
 const PORT = process.env.PORT || 3000;
-const localIp = getLocalIp();
 // PUBLIC_URL (tunnel) or RENDER_EXTERNAL_URL (Render hosting) provides the QR link instead of the LAN IP
 const envBase = process.env.PUBLIC_URL || process.env.RENDER_EXTERNAL_URL;
 const publicBase = envBase ? envBase.replace(/\/+$/, '') : null;
-const playerUrl = publicBase ? `${publicBase}/player.html` : `http://${localIp}:${PORT}/player.html`;
+
+function playerUrlNow() {
+  return publicBase ? `${publicBase}/player.html` : `http://${getLocalIp()}:${PORT}/player.html`;
+}
+
+const playerUrl = playerUrlNow();
 
 function currentQuestion() {
   return roundsData[gameState.currentRoundIndex].questions[gameState.currentQuestionIndex];
@@ -431,12 +448,19 @@ io.on('connection', (socket) => {
   });
 });
 
-QRCode.toDataURL(playerUrl, (err, url) => {
-  server.listen(PORT, () => {
-    console.log('\n  SPACE QUIZ - SAVE THE ASTRONAUT');
-    console.log('  Server :  http://localhost:' + PORT);
-    console.log('  Players:  ' + playerUrl);
-    console.log('  Host   :  http://localhost:' + PORT + '/host.html\n');
-  });
-  app.get('/api/qr', (req, res) => res.json({ qr: url, playerUrl }));
+server.listen(PORT, () => {
+  console.log('\n  SPACE QUIZ - SAVE THE ASTRONAUT');
+  console.log('  Server :  http://localhost:' + PORT);
+  console.log('  Players:  ' + playerUrl);
+  console.log('  Host   :  http://localhost:' + PORT + '/host.html\n');
+});
+
+// rebuild on every request so the QR follows the current LAN address
+app.get('/api/qr', async (req, res) => {
+  const url = playerUrlNow();
+  try {
+    res.json({ qr: await QRCode.toDataURL(url), playerUrl: url });
+  } catch (e) {
+    res.status(500).json({ error: 'qr generation failed' });
+  }
 });

@@ -476,15 +476,19 @@ function render() {
     renderWinner();
   }
 
-  $('playerCount').textContent = `${Object.keys(state.players || {}).length} player(s) connected`;
+  $('playerCount').textContent = `${socket.connected ? '🟢 LIVE' : '🔴 NOT CONNECTED'} — ${Object.keys(state.players || {}).length} player(s) connected`;
   renderScoreboard();
   setButtons();
 }
 
+let stateKey = null;
+
 socket.on('gameState', s => {
   if (s.serverNow) timeOffset = s.serverNow - Date.now();
-  if (s.correctAnswers !== undefined) { correctAnswers = s.correctAnswers; answered = 0; }
-  if (s.phase === 'question') answered = 0;
+  if (s.correctAnswers !== undefined) correctAnswers = s.correctAnswers;
+  // reset the counter only when a new question starts, not on every broadcast
+  const key = `${s.phase}|${s.currentRoundIndex}|${s.currentQuestionIndex}`;
+  if (key !== stateKey) { stateKey = key; answered = 0; }
   state = s;
   render();
 });
@@ -492,6 +496,11 @@ socket.on('gameState', s => {
 socket.on('playerAnswered', () => {
   answered++;
   if (state) setButtons();
+});
+
+socket.on('connect', () => { if (state) render(); });
+socket.on('disconnect', () => {
+  $('playerCount').textContent = '🔴 NOT CONNECTED — server unreachable, reconnecting…';
 });
 
 $('btnStartRound').onclick = () => socket.emit('host:startRound');
